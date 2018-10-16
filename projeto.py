@@ -182,51 +182,16 @@ def adam_bashforth(y_set, t0, h, n, f, order):
 	if order < 2:
 		raise("Order not supported")
 
-	for j in range(0, n): 
+	for j in range(0, n - order): 
 		pt_set = list(reversed(points))
 		total = 0
 		for i in range(0, len(coeficients[order - 2])):
 			total += coeficients[order - 2][i]*proc(t0 + h*(j+i), pt_set[i], f)
 		val = pt_set[0] + h*total
 		points.append(val)
-		
 	
-	return points
+	points = [(t0 + idx*h, y) for idx, y in enumerate(points)]
 	
-def adam_bashforth_by_euler():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def adam_bashforth_by_euler_inverso():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def adam_bashforth_by_euler_aprimorado():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def adam_bashforth_by_runge_kutta():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
 	return points
 	
 def adam_multon():
@@ -349,42 +314,96 @@ def route_method(line):
 	inputString = ' '.join(inputString.split(' ')[1:])
 
 	if method == "euler":
-		print("euler")
+		print("Metodo de Euler")
 		y0, t0, h, n, f = inputString.split(" ")
 		y0, t0, h, n = float(y0), float(t0), float(h), int(n)
-		points = euler(t0, y0, h, n, f)
+
+		print("y(", t0, ")")
+		print("h =", h)
+		points = euler(t0, y0, h, n + 1, f)
 
 	elif method == "euler_inverso":
-		print("euler_inverso")
-		# points = euler_inverso()
+		print("Metodo de Euler Inverso")
+		y0, t0, h, n, f = inputString.split(" ")
+		y0, t0, h, n = float(y0), float(t0), float(h), int(n)
+
+		print("y(", t0, ")")
+		print("h =", h)
+		points = euler_inverso(t0, y0, h, n + 1, f)
 
 	elif method == "euler_aprimorado":
-		print("euler_aprimorado")
-		# points = euler_aprimorado()
+		print("Metodo de Euler Aprimorado")
+		y0, t0, h, n, f = inputString.split(" ")
+		y0, t0, h, n = float(y0), float(t0), float(h), int(n)
+
+		print("y(", t0, ")")
+		print("h =", h)
+		points = euler_aprimorado(t0, y0, h, n + 1, f)
 
 	elif method == "runge_kutta":
-		print("runge_kutta")
-		# points = runge_kutta()
+		print("Metodo de Runge-Kutta")
+		y0, t0, h, n, f = inputString.split(" ")
+		y0, t0, h, n = float(y0), float(t0), float(h), int(n)
+
+		print("y(", t0, ")")
+		print("h =", h)
+		points = runge_kutta(t0, y0, h, n + 1, f)
 
 	elif method == "adam_bashforth":
-		print("adam_bashforth")
-		# points = adam_bashforth()
+		print("Metodo Adam-Bashforth")
+		t0, h, n, f, order = inputString.split(" ")[-5:] ## The last five elements
+		t0, h, n, order = float(t0), float(h), int(n), int(order)
+
+		y_set = inputString.split(" ")[:-5]
+		y_set = [float(a) for a in y_set]
+
+		print("y(", t0, ")")
+		print("h =", h)
+		points = adam_bashforth(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_bashforth_by_euler":
-		print("adam_bashforth_by_euler")
-		# points = adam_bashforth_by_euler()
+		print("Metodo Adam-Bashforth por Euler")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = euler(t0, y0, h, order, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_bashforth(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_bashforth_by_euler_inverso":
-		print("adam_bashforth_by_euler_inverso")
-		# points = adam_bashforth_by_euler_inverso()
+		print("Metodo Adam-Bashforth por Euler Inverso")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = euler_inverso(t0, y0, h, order, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_bashforth(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_bashforth_by_euler_aprimorado":
-		print("adam_bashforth_by_euler_aprimorado")
-		# points = adam_bashforth_by_euler_aprimorado()
+		print("Metodo Adam-Bashforth por Euler Aprimorado")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = euler_aprimorado(t0, y0, h, order, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_bashforth(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_bashforth_by_runge_kutta":
-		print("adam_bashforth_by_runge_kutta")
-		# points = adam_bashforth_by_runge_kutta()
+		print("Metodo Adam-Bashforth por Runge-Kutta")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = runge_kutta(t0, y0, h, order, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_bashforth(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_multon":
 		print("adam_multon")
