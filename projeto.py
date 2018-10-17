@@ -158,6 +158,7 @@ def runge_kutta(t0, y0, h, n, f):
 	
 def adam_bashforth(y_set, t0, h, n, f, order):
 	"""
+	Computes the adams bashforth default method.
 	param y_set The set containing all the y values of the method in order. 
 				This parameter goes from n-k untill n in the array, means y_set[0] = y_{n-k}.
 	param t0    The t value from the first step, it is the step n-k.
@@ -178,65 +179,86 @@ def adam_bashforth(y_set, t0, h, n, f, order):
 		[198721/60480, -18637/2520, 235183/20160, -10754/945, 135713/20160, -5603/2520, 19087/60480],
 		[16083/4480, -1152169/120960, 242653/13440, 2102243/120960, -115747/13440, 32863/13440, -5257/17280]
 	]
-	
-	if order < 2:
-		raise("Order not supported")
 
-	for j in range(0, n - order): 
-		pt_set = list(reversed(points))
-		total = 0
-		for i in range(0, len(coeficients[order - 2])):
-			total += coeficients[order - 2][i]*proc(t0 + h*(j+i), pt_set[i], f)
-		val = pt_set[0] + h*total
-		points.append(val)
+	constants = [5/12, -3/8, 251/720, -95/288, 19087/60480, -5257/17280, 1070017/3628800]
 	
-	points = [(t0 + idx*h, y) for idx, y in enumerate(points)]
+	if order < 1:
+		raise ValueError("orders lower than 1 not supported in Adams Bashforth Method")
+
+	elif order == 1:
+		y0 = y_set[0]
+		points = euler(t0, y0, h, n, f)
+
+	else:
+		for j in range(0, n - order):  # iterate untill the last point from prediction
+			pt_set = list(reversed(points))
+			total = 0
+			i_limit = len(coeficients[order - 2]) - 1
+			for i in range(0, len(coeficients[order - 2])):
+				total += coeficients[order - 2][i]*proc(t0 + h*(j+ (i_limit - i)), pt_set[i], f)
+			val = pt_set[0] + h*total
+			# val -= constants[order - 2]*h
+			points.append(val)
+		
+		points = [(t0 + idx*h, y) for idx, y in enumerate(points)]
 	
 	return points
 	
-def adam_multon():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
+def adam_multon(y_set, t0, h, n, f, order):
 	"""
-	points = []
-	return points
+	Computes the adams multon default method.
+	param y_set The set containing all the y values of the method in order. 
+				This parameter goes from n-k untill n in the array, means y_set[0] = y_{n-k}.
+	param t0    The t value from the first step, it is the step n-k.
+	param h     The step size.
+	param n     Number of steps to use in the method.
+	param f     The differential equation used.
+	param order The order of the Adams Bashforth method. Goes from second order to the seventh order.
 	
-def adam_multon_by_euler():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
+	return      The set of computed points.
 	"""
-	points = []
-	return points
-	
-def adam_multon_by_euler_inverso():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def adam_multon_by_euler_aprimorado():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def adam_multon_by_runge_kutta():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
+	points = list(y_set)
+
+	coeficients = [
+		[1/2, 1/2],
+		[5/12, 2/3, -1/12],
+		[3/8, 19/24, -5/24],
+		[251/720, 323/360, -11/30, 53/360, -19/720],
+		[95/288, 1427/1440, -133/240, 241/720, -173/1440, 3/160],
+		[19087/60480, 2713/2520, -15487/20160, 586/945, -6737/20160, 263/2520, -863/60480],
+		[5257/17280, 139849/120960, -4511/4480, 123133/120960, -88547/120960, 1537/4480, -11351/120960, 275/24192]
+	]
+
+	if order < 1:
+		raise ValueError("orders lower than 1 not supported in Adams Multon Method")
+
+	elif order == 1:
+		y0 = y_set[0]
+		points = euler_inverso(t0, y0, h, n, f)
+
+	else:
+		for j in range(0, n - order + 1): # iterate untill the last point from prediction
+			pt_set = list(reversed(points))
+			total = 0
+			
+			i_limit = len(coeficients[order - 2]) - 1
+			for i in range(0, len(coeficients[order - 2]) - 1):
+				total += coeficients[order - 2][i + 1]*proc(t0 + h*(j+ (i_limit - i - 1)), pt_set[i], f)
+
+			## get the next step
+			n_set = adam_bashforth(y_set, t0, h, order + 1, f, order - 1)
+			
+			## retrive the predicted point
+			_, y_val = n_set[-1] 
+
+			## Add the last point
+			total += coeficients[order - 2][0]*proc(t0 + h*(j+i_limit), y_val, f) # them add the predicted point
+
+			val = pt_set[0] + h*total
+			points.append(val)
+		
+		points = [(t0 + idx*h, y) for idx, y in enumerate(points)]
+
 	return points
 	
 def formula_inversa():
@@ -247,44 +269,6 @@ def formula_inversa():
 	"""
 	points = []
 	return points
-	
-def formula_inversa_by_euler():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def formula_inversa_by_euler_inverso():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def formula_inversa_by_euler_aprimorado():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-	
-def formula_inversa_by_runge_kutta():
-	"""Summary
-	
-	Returns:
-		TYPE: Description
-	"""
-	points = []
-	return points
-
-
 
 def detect_method(line):
 	"""Summary
@@ -406,24 +390,60 @@ def route_method(line):
 		points = adam_bashforth(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_multon":
-		print("adam_multon")
-		# points = adam_multon()
+		print("Metodo Adam-Multon")
+		t0, h, n, f, order = inputString.split(" ")[-5:] ## The last five elements
+		t0, h, n, order = float(t0), float(h), int(n), int(order)
+
+		y_set = inputString.split(" ")[:-5]
+		y_set = [float(a) for a in y_set]
+
+		print("y(", t0, ")")
+		print("h =", h)
+		points = adam_multon(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_multon_by_euler":
-		print("adam_multon_by_euler")
-		# points = adam_multon_by_euler()
+		print("Metodo Adam-Multon por Euler")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = euler(t0, y0, h, order - 1, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_multon(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_multon_by_euler_inverso":
-		print("adam_multon_by_euler_inverso")
-		# points = adam_multon_by_euler_inverso()
+		print("Metodo Adam-Multon por Euler Inverso")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = euler_inverso(t0, y0, h, order - 1, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_multon(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_multon_by_euler_aprimorado":
-		print("adam_multon_by_euler_aprimorado")
-		# points = adam_multon_by_euler_aprimorado()
+		print("Metodo Adam-Multon por Euler Aprimorado")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = euler_aprimorado(t0, y0, h, order - 1, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_multon(y_set, t0, h, n + 1, f, order)
 
 	elif method == "adam_multon_by_runge_kutta":
-		print("adam_multon_by_runge_kutta")
-		# points = adam_multon_by_runge_kutta()
+		print("Metodo Adam-Multon por Runge-Kutta")
+		y0, t0, h, n, f, order = inputString.split(" ")
+		y0, t0, h, n, order = float(y0), float(t0), float(h), int(n), int(order)
+
+		points = runge_kutta(t0, y0, h, order - 1, f)
+		_, y_set = zip(*points)
+		print(y_set)
+
+		points = adam_multon(y_set, t0, h, n + 1, f, order)
 
 	elif method == "formula_inversa":
 		print("formula_inversa")
