@@ -1,11 +1,31 @@
-#############################################################
-# Author: Caio Moreira Gomes                                #
-#                                                           #
-# That one is a software to compute differential equations  #
-# numerically throught different methods.                   #
-#                                                           #
-# Every single method returns a list of pairs (t_n, y_n)    #
-#############################################################
+##################################################################################
+# MIT License                                                                    #
+#                                                                                #
+# Copyright (c) 2018 Caio Gomes                                                  #
+#                                                                                #
+# Permission is hereby granted, free of charge, to any person obtaining a copy   #
+# of this software and associated documentation files (the "Software"), to deal  #
+# in the Software without restriction, including without limitation the rights   #
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      #
+# copies of the Software, and to permit persons to whom the Software is          #
+# furnished to do so, subject to the following conditions:                       #
+#                                                                                #
+# The above copyright notice and this permission notice shall be included in all #
+# copies or substantial portions of the Software.                                #
+#                                                                                #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     #
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       #
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    #
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         #
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  #
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  #
+# SOFTWARE.                                                                      #
+##################################################################################
+# That one is a software to compute differential equations  numerically throught #
+# different methods.                                                             #
+#                                                                                #
+# Every single method returns a list of pairs (t_n, y_n)                         #
+##################################################################################
 
 #############################
 ## Import libs
@@ -36,6 +56,7 @@ def plot_graph(points, f):
 	
 	Args:
 	    points (list(float, float)): The list with points (t_n, y_n)
+	    f (str): The string containing the function to be ploted
 	"""
 	t_axis, y_axis = zip(*points)
 	# plt.pyplot.xlabel("t")
@@ -47,10 +68,11 @@ def plot_graph(points, f):
 	plt.show()
 
 def print_points(points, f):
-	"""Plot the graph with matplotlib
+	"""Plot the points of the graph
 	
 	Args:
 	    points (list(float, float)): The list with points (t_n, y_n)
+	    f (FILE): The file where you must print the points
 	"""
 	for idx, (t, y) in enumerate(points):
 		# print(idx, y)
@@ -58,6 +80,12 @@ def print_points(points, f):
 	log_write("")
 
 def log_write(string):
+	"""
+	Log in the terminal with a print and log the same data in a text file called 'saida.txt'
+	
+	Args:
+	    string (str): The text to log
+	"""
 	print(string)
 	with open("saida.txt", "a") as f:
 		f.write(string + "\n")
@@ -213,16 +241,17 @@ def adam_bashforth(y_set, t0, h, n, f, order):
 	
 	return points
 	
-def adam_multon(y_set, t0, h, n, f, order):
+def adam_multon(y_set, t0, h, n, f, order, function=None):
 	"""
 	Computes the adams multon default method.
-	param y_set The set containing all the y values of the method in order. 
-				This parameter goes from n-k untill n in the array, means y_set[0] = y_{n-k}.
-	param t0    The t value from the first step, it is the step n-k.
-	param h     The step size.
-	param n     Number of steps to use in the method.
-	param f     The differential equation used.
-	param order The order of the Adams Bashforth method. Goes from second order to the seventh order.
+	param y_set    The set containing all the y values of the method in order. 
+				   This parameter goes from n-k untill n in the array, means y_set[0] = y_{n-k}.
+	param t0       The t value from the first step, it is the step n-k.
+	param h        The step size.
+	param n        Number of steps to use in the method.
+	param f        The differential equation used.
+	param order    The order of the Adams Bashforth method. Goes from second order to the seventh order.
+	param function The function to compute the next point to use as inference for the derivative computation.
 	
 	return      The set of computed points.
 	"""
@@ -261,7 +290,10 @@ def adam_multon(y_set, t0, h, n, f, order):
 			lst = list(reversed(pt_set[:mx]))
 			t_val = t0 + h*(max(len(pt_set) - mx, 0))
 			# n_set = adam_bashforth(lst, t_val, h, mx + 1, f, mx - 1)
-			n_set = euler_inverso(t0 + h*len(pt_set), pt_set[0], h, 2, f)
+			if function == None:
+				n_set = euler_inverso(t0 + h*len(pt_set), pt_set[0], h, 2, f)
+			else:
+				n_set = function(t0 + h*len(pt_set), pt_set[0], h, 2, f)
 			
 			## retrive the predicted point
 			_, y_val = n_set[-1]
@@ -277,16 +309,17 @@ def adam_multon(y_set, t0, h, n, f, order):
 
 	return points
 	
-def formula_inversa(y_set, t0, h, n, f, order):
+def formula_inversa(y_set, t0, h, n, f, order, function=None):
 	"""
 	Computes the adams multon default method.
-	param y_set The set containing all the y values of the method in order. 
-				This parameter goes from n-k untill n in the array, means y_set[0] = y_{n-k}.
-	param t0    The t value from the first step, it is the step n-k.
-	param h     The step size.
-	param n     Number of steps to use in the method.
-	param f     The differential equation used.
-	param order The order of the Adams Bashforth method. Goes from second order to the seventh order.
+	param y_set    The set containing all the y values of the method in order. 
+				   This parameter goes from n-k untill n in the array, means y_set[0] = y_{n-k}.
+	param t0       The t value from the first step, it is the step n-k.
+	param h        The step size.
+	param n        Number of steps to use in the method.
+	param f        The differential equation used.
+	param order    The order of the Adams Bashforth method. Goes from second order to the seventh order.
+	param function The function to compute the next point to use as inference for the derivative computation.
 	
 	return      The set of computed points.
 	"""
@@ -314,8 +347,10 @@ def formula_inversa(y_set, t0, h, n, f, order):
 		y_set = list(reversed(pt_set[:mn]))
 		t_val = t0 + h*abs(len(y_set) - mn)
 		# _, y_val = adam_bashforth(y_set, t_val, h, mn + 1, f, mn - 1)[-1]
-
-		_, y_val = runge_kutta(t0 + h*len(pt_set), pt_set[0], h, 2, f)[-1]
+		if function == None:
+			_, y_val = runge_kutta(t0 + h*len(pt_set), pt_set[0], h, 2, f)[-1]
+		else:
+			_, y_val = function(t0 + h*len(pt_set), pt_set[0], h, 2, f)[-1]
 
 		# The differential value computed
 		other = h*coeficients[order - 1][-1]*proc(t0 + h*len(pt_set), y_val, f)
