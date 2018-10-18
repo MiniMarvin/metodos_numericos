@@ -9,6 +9,7 @@ if [ $ret -eq 0 ]; then
     	echo "we require python3 version to work otherwise"
 	else
 		echo "python3 version ok"
+		pip3 install -r requirements.txt
 	fi 
 else 
     echo "python version is > 3"

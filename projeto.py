@@ -655,7 +655,7 @@ def main():
 			inputString = line.replace('\n', '').replace('\r', '')
 			inputString = ' '.join(inputString.split(' ')[1:])
 
-			# plot_graph(points, inputString.split(" ")[-1])
+			plot_graph(points, inputString.split(" ")[-1])
 
 
 if __name__ == "__main__":
