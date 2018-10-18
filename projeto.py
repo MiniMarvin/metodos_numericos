@@ -600,6 +600,10 @@ def main():
 	"""
 	The main control and the default guide to the software
 	"""
+	# kill the output text file
+	with open("saida.txt", "w") as f:
+		f.write("")
+
 	fname = "entrada.txt"
 	with open(fname, "r") as f:
 		for line in f:
